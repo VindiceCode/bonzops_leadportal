@@ -1,0 +1,141 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from models.database import Database
+from datetime import datetime, timedelta
+
+# Initialize database
+db = Database()
+
+def load_source_performance():
+    with db.conn.cursor() as cur:
+        cur.execute('''
+            SELECT 
+                source_type,
+                SUM(success_count) as total_success,
+                SUM(records_processed) as total_records,
+                ROUND(100.0 * SUM(success_count) / NULLIF(SUM(records_processed), 0), 2) as success_rate
+            FROM processing_logs
+            WHERE processed_at >= NOW() - INTERVAL '30 days'
+            GROUP BY source_type
+        ''')
+        return pd.DataFrame(cur.fetchall(), 
+                          columns=['source_type', 'total_success', 'total_records', 'success_rate'])
+
+def main():
+    # Page config
+    st.set_page_config(
+        page_title="Pro Services SLA Dashboard",
+        layout="wide"
+    )
+
+    # Custom CSS with Bonzo theme
+    st.markdown('''
+        <style>
+            .stApp {
+                background-color: #1E1E1E;
+                color: white;
+            }
+            .main-header {
+                color: #FF69B4;
+                text-align: center;
+                font-size: 2.5rem;
+                margin-bottom: 2rem;
+            }
+            .metric-container {
+                background-color: #282828;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+            }
+            .source-metric {
+                font-size: 1.8rem;
+                color: white;
+            }
+            .warning {
+                color: #FF4B4B;
+                font-weight: bold;
+            }
+            .success {
+                color: #00CC00;
+                font-weight: bold;
+            }
+            .sla-button {
+                background-color: #FF69B4;
+                color: black;
+                padding: 1rem 2rem;
+                border-radius: 0.5rem;
+                font-weight: bold;
+                margin-top: 1rem;
+            }
+        </style>
+    ''', unsafe_allow_html=True)
+
+    # Header
+    st.markdown('<h1 class="main-header">Pro Services SLA Dashboard</h1>', unsafe_allow_html=True)
+
+    # Load data
+    performance_df = load_source_performance()
+    
+    # Target line for reference
+    target_line = 90
+
+    # Create performance chart
+    fig = px.bar(
+        performance_df,
+        x='source_type',
+        y='success_rate',
+        title='Lead Source Parse Success Rate',
+        labels={
+            'source_type': 'Lead Source',
+            'success_rate': 'Success Rate (%)'
+        },
+        template='plotly_dark'
+    )
+
+    # Add target line
+    fig.add_hline(
+        y=target_line,
+        line_dash='dash',
+        line_color='red',
+        annotation_text='90% Target',
+        annotation_position='right'
+    )
+
+    # Update layout
+    fig.update_layout(
+        plot_bgcolor='#282828',
+        paper_bgcolor='#282828',
+        font_color='white',
+        height=500
+    )
+
+    # Display chart
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Display metrics for each source
+    cols = st.columns(len(performance_df))
+    show_sla_button = False
+
+    for idx, (_, row) in enumerate(performance_df.iterrows()):
+        with cols[idx]:
+            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+            st.markdown(f'<div class="source-metric">{row["source_type"].title()}</div>', unsafe_allow_html=True)
+            success_class = 'success' if row['success_rate'] >= target_line else 'warning'
+            st.markdown(f'<div class="{success_class}">{row["success_rate"]}%</div>', unsafe_allow_html=True)
+            st.metric("Total Processed", f"{row['total_records']:,}")
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            if row['success_rate'] < target_line:
+                show_sla_button = True
+
+    # Show SLA button if any source is below target
+    if show_sla_button:
+        st.markdown('---')
+        st.markdown('<div style="text-align: center">', unsafe_allow_html=True)
+        if st.button("Book Priority SLA Call with Pro Services", key='sla_button'):
+            st.info("Booking functionality will be implemented in a future update")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
