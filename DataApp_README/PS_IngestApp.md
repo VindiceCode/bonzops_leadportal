@@ -1,6 +1,7 @@
 # General Approach for Lead Processing and CRM Integration
 
 ## Overview
+
 This approach outlines how a consultant can efficiently process business leads from various sources, parse them, and consistently upload them to Bonzo CRM. It ensures SLA adherence and enables booking access to professional services when SLAs exceed thresholds. Data is stored in a PostgreSQL database as leads are created, allowing for updates to the prospect's journey and additional reporting.
 
 ## Key Steps
@@ -21,16 +22,16 @@ This approach outlines how a consultant can efficiently process business leads f
 - Store lead data in a PostgreSQL database for the client being serviced.
 - Use stored data to update the prospect's journey and generate detailed reports.
 
-![SLA Dashboard](ED-1.png)
-![SLA Dashboard](ED-2.png)
+![SLA Dashboard](images/ED-1.png)
+![SLA Dashboard](images/ED-2.png)
 
-![Webhook Response Analytics Example Diagram](WH-A1.png)
-![Webhook Response Analytics Example Diagram](WH-A2.png)
-![Webhook Response Analytics Example Diagram](WH-A3.png)
+![Webhook Response Analytics Example Diagram](images/WH-A1.png)
+![Webhook Response Analytics Example Diagram](images/WH-A2.png)
+![Webhook Response Analytics Example Diagram](images/WH-A3.png)
 
 ## More Drafts of the Executive Dashboard we Can Link in through Resource Links
-![Executive Dashboard Draft](ED-3.png)
-![Executive Dashboard Draft](ED-4.png)
+![Executive Dashboard Draft](images/ED-3.png)
+![Executive Dashboard Draft](images/ED-4.png)
 
 
 ## Feature Roadmap for Enhanced Lead Processing and CRM Integration
@@ -43,8 +44,7 @@ This approach outlines how a consultant can efficiently process business leads f
 - Implement tracking for SLA adherence, team performance, and lead source effectiveness.
 - Enable professional services to manage critical SLA requirements and provide managed success services.
 
-![SLA Dashboard](SLADashboard.png)
-
+![SLA Dashboard](images/SLADashboard.png)
 
 
 ### On-Premise Deployment Capability
